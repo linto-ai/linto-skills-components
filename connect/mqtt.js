@@ -6,6 +6,8 @@ const mqttLabel = require('../data/label').connect.mqtt
 
 const KEEPALIVE = 2
 const QOS = 2 // MQTT ensures that it will be received with no duplicates
+const MAX_CONNECT_ATTEMPT = 30
+const TIME_CONNECT_BEFORE_RETRY = 10000
 
 class ConnectorMqtt {
   constructor(node) {
@@ -42,34 +44,65 @@ class ConnectorMqtt {
       mqttConfig.password = flowMqttConfig.password
     }
 
+
     return new Promise((resolve, reject) => {
       if (!this.client) { // Allow one connection by node component
-        this.client = Mqtt.connect(mqttConfig)
+        try {
+          this.clientConnect(mqttConfig, node, resolve, reject)
+        } catch (error) {
+          debug('ERROR WHILE ATTEMPTING TO')
 
-        this.client.on('error', e => {
-          console.error(`${mqttLabel.brokerError} : ${e}`)
-          this.client.end()
-          reject(`${mqttLabel.brokerError} : ${e}`)
-        })
+        }
 
-        let mqttConnectError = setTimeout(() => {
-          console.error(mqttLabel.brokerErrorConnect)
-          node.sendStatus('red', 'ring', mqttLabel.brokerErrorConnect)
-          reject(mqttLabel.brokerErrorConnect)
-        }, 2000)
-
-        this.client.once('connect', () => {
-          clearTimeout(mqttConnectError)
-
-          this.client.on('offline', () => {
-            console.error(mqttLabel.brokerDisconnected)
-            node.sendStatus('red', 'ring', mqttLabel.brokerDisconnected)
-          })
-          resolve(this)
-        })
       } else {
         resolve(this)
       }
+    })
+  }
+
+  clientConnect(mqttConfig, node, resolve, reject) {
+    this.client = Mqtt.connect(mqttConfig)
+    this.attempt = 0
+
+    function mqttConnectTimeout() {
+      if (MAX_CONNECT_ATTEMPT === this.attempt) {
+        node.sendStatus('red', 'ring', mqttLabel.brokerErrorAttemptExceeded)
+        reject(mqttLabel.brokerErrorConnect)
+      } else if (this.client.connected === false) {
+        this.attempt++
+        this.client.reconnect()
+        node.sendStatus('red', 'ring', mqttLabel.brokerErrorConnectRetry)
+        setTimeout(mqttConnectTimeout.bind(this), TIME_CONNECT_BEFORE_RETRY)
+      }
+    }
+    let mqttConnectError = setTimeout(mqttConnectTimeout.bind(this), TIME_CONNECT_BEFORE_RETRY)
+
+
+    this.client.on('error', e => {
+      console.error(`${mqttLabel.brokerError} : ${e}`)
+      this.client.end()
+      reject(`${mqttLabel.brokerError} : ${e}`)
+    })
+
+    this.client.on('disconnect', () => {
+      node.sendStatus('red', 'ring', mqttLabel.brokerDisconnected)
+    })
+
+    this.client.on('reconnect', () => {
+      if (this.client.connected === true) node.sendStatus('green', 'ring', mqttLabel.connect)
+    })
+
+    this.client.once('connect', () => {
+      clearTimeout(mqttConnectError)
+
+      this.attempt = 0
+      node.sendStatus('green', 'ring', mqttLabel.connect)
+
+      this.client.on('offline', () => {
+        console.error(mqttLabel.brokerDisconnected)
+        node.sendStatus('red', 'ring', mqttLabel.brokerDisconnected)
+      })
+      resolve(this)
     })
   }
 
