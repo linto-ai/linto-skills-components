@@ -31,13 +31,6 @@ class LintoCoreEventNode extends CoreNode {
       }
     })
   }
-
-  sendPayloadToLinTO(topic, payload) {
-    this.wireEvent.notify(`${this.node.z}-${this.wireEvent.getOutputName()}`, {
-      topic,
-      payload
-    })
-  }
 }
 
 module.exports = LintoCoreEventNode

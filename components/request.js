@@ -51,6 +51,32 @@ class Request {
     })
   }
 
+
+  async put(url, form, token) {
+    let options = {
+      url,
+      ...form
+    }
+    token && options.headers ? options.headers = {} : null
+    token ? options.headers.authorization = token : null
+
+    return new Promise((resolve, reject) => {
+      try {
+        request.put(options, function (error, response, body) {
+          if (error) {
+            reject(error)
+          }
+          if (response === undefined || response.statusCode >= 400) {
+            reject(response)
+          }
+          resolve(body)
+        })
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
   async custom(options, customHandler) {
     request(options, customHandler)
   }

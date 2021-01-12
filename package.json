@@ -1,7 +1,7 @@
 {
   "name": "@linto-ai/linto-components",
   "description": "All linto components used for making a linto skill",
-  "version": "0.0.11",
+  "version": "0.0.14",
   "main": "index.js",
   "author": "yhoupert@linagora.com",
   "license": "AGPL-3.0-or-later",

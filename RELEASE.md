@@ -1,3 +1,6 @@
+# 0.14.0
+- Added retry connection on connect node type
+
 # 0.0.5
 - Fix empty request
 

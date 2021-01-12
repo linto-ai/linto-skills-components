@@ -21,14 +21,14 @@ class RedAction {
     return null
   }
 
-    /**
-    * @summary Search a specific node based on their exact name
-    *  
-    * @param {String} flowId the flow id to search the node
-    * @param {String} nodeName the node name to get information
-    *
-    * @returns {Object} The N corresponding node based on their name
-  **/
+  /**
+  * @summary Search a specific node based on their exact name
+  *  
+  * @param {String} flowId the flow id to search the node
+  * @param {String} nodeName the node name to get information
+  *
+  * @returns {Object} The N corresponding node based on their name
+**/
   findNodeType(flowId, nodeName) {
     let findNode = undefined
     this.nodes.eachNode((node) => {
@@ -103,6 +103,28 @@ class RedAction {
     this.nodes.eachNode((node) => {
       if (node.z === flowId && !node.d) {
         flowsNodes.push(node)
+      }
+    })
+    return flowsNodes
+  }
+
+  /**
+  * @summary Get all node based on a flow id
+  *  
+  * @param {Object} flowId the flow id to search the node
+  *
+  * @returns {Object} The N corresponding node based on the flow id
+**/
+  listPartialNodesInfosFromFlowId(flowId) {
+    let flowsNodes = []
+    this.nodes.eachNode((node) => {
+      if (node.z === flowId && !node.d) {
+        flowsNodes.push({
+          id: node.id,
+          type: node.type,
+          name: node.name,
+          description: node.description
+        })
       }
     })
     return flowsNodes

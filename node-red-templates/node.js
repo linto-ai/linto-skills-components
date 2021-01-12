@@ -36,5 +36,7 @@ class LintoNode {
 
 module.exports = LintoNode
 module.exports.loadFile = (dirLocation, filePath) => {
-  return fs.readFileSync(`${dirLocation}/${filePath}`, 'utf-8')
+  const ext = filePath.substring(filePath.indexOf('.'))
+  if (ext === '.json') return require(`${dirLocation}/${filePath}`)
+  else return fs.readFileSync(`${dirLocation}/${filePath}`, 'utf-8')
 }
