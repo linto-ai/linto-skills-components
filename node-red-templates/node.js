@@ -22,7 +22,7 @@ class LintoNode {
   }
 
   setFlowConfig(key, value) {
-    this.node.context().flow.set(key, value)
+    if (key && value) this.node.context().flow.set(key, value)
   }
 
   getFlowConfig(key) {
