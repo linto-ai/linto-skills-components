@@ -1,6 +1,5 @@
 # 0.0.15
 - Fix setFlowConfig on empty value
-
 # 0.0.14
 - Added retry connection on connect node type
 

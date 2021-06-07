@@ -38,8 +38,11 @@ class WireEvent {
           let toLintoRes = {
             topic: args[0],
             payload: skillResult,
-            transcript : args[0].payload.transcript.text
           }
+
+          if (args[0].payload.transcript && args[0].payload.transcript.text)
+            toLintoRes.transcript = args[0].payload.transcript
+
           this.notify(`${flowId}-${OUTPUT_NODE_NAME}`, toLintoRes)
         }
 
@@ -61,8 +64,11 @@ class WireEvent {
           let toLintoRes = {
             topic: (args[0].topic) ? args[0].topic : args[0].payload.topic,
             payload: skillResult,
-            transcript : args[0].payload.transcript.text
           }
+
+          if (args[0].payload.transcript && args[0].payload.transcript.text)
+            toLintoRes.transcript = args[0].payload.transcript
+
           node.wireEvent.notify(`${flowId}-${OUTPUT_NODE_NAME}`, toLintoRes)
         }
 
@@ -90,7 +96,6 @@ class WireEvent {
   isEventFlow(eventName) {
     let event = `${this.eventBaseName}${eventName}`
     let result = Object.keys(this.redEvents._events).filter(name => name === event)
-
     if (result.length === 0) {
       return false
     }

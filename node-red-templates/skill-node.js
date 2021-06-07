@@ -9,7 +9,7 @@ const { AutoLoadException } = require('../exception/node')
 const wireEvent = require('../components/wire-event')
 const skillNodeLabel = require('../data/label').nodeRedTemplates.skillNode
 
-const DEFAULT_COMPONENT_NODE_TO_LOAD = ['/controllers', '/data', '/events']
+const DEFAULT_COMPONENT_NODE_TO_LOAD = ['/controllers', '/data', '/events', '/actions']
 const DEFAULT_LANGUAGE = { language: 'en-US' }
 
 class LintoSkillNode extends Node {
@@ -86,6 +86,11 @@ async function loadFolderData(dirName) {
             let controller = require(itemPath)
 
             if (dir === '/events' && typeof controller === "function") {
+              this.wireEvent.subscribeWithStatus.call(this, this.node.z, name, controller.bind(this))
+              this.registeredEvent.push(`${this.node.z}-${name}`)
+            }
+            else if (dir === '/actions' && typeof controller === "function") {
+              name = 'customAction-' + name
               this.wireEvent.subscribeWithStatus.call(this, this.node.z, name, controller.bind(this))
               this.registeredEvent.push(`${this.node.z}-${name}`)
             }
